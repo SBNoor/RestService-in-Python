@@ -5,3 +5,4 @@ pytest==6.2.3
 SQLAlchemy
 uvicorn==0.18.3
 virtualenv==20.21.0
+requests
