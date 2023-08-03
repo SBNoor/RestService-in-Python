@@ -125,3 +125,175 @@ def test_get_player_by_username():
         "gender": "male",
         "risk_scores": [],
     }
+
+def test_add_riskScore_to_player():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player2", 
+            "first_name": "Player", 
+            "last_name": "Two", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # add risk score to the player
+    response = client.post(
+        "/players/player2/scores/",
+        json={"score": 80.5},
+    )
+    assert response.status_code == 200
+    assert "created_at" in response.json()
+    assert response.json()["score"] == 80.5
+
+
+def test_get_riskScores_for_a_player():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player3", 
+            "first_name": "Player", 
+            "last_name": "Three", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # add risk score to the player
+    response = client.post(
+        "/players/player3/scores/",
+        json={"score": 90.5},
+    )
+    assert response.status_code == 200
+
+    # get risk scores for the player
+    response = client.get("/players/player3/scores/")
+    assert response.status_code == 200
+    assert len(response.json()) > 0
+    assert "created_at" in response.json()[0]
+    assert response.json()[0]["score"] == 90.5
+
+def test_get_scores_of_all_players():
+    # Create player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player8", 
+            "first_name": "Player", 
+            "last_name": "Eight", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # Add risk score
+    response = client.post("/players/player8/scores/", json={"score": 90.0})
+    assert response.status_code == 200
+
+    # Get all players scores
+    response = client.get("/players/scores/")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Check the result
+    assert any(player["username"] == "player8" and player["risk_scores"][0]["score"] == 90.0 for player in data)
+
+def test_get_player_state():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player4", 
+            "first_name": "Player", 
+            "last_name": "Four", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # get state of the player
+    response = client.get("/players/player4/state/")
+    assert response.status_code == 200
+    assert response.json()["state"] == "active"
+
+def test_get_state_of_all_players():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player5", 
+            "first_name": "Player", 
+            "last_name": "Five", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # get state of all players
+    response = client.get("/players/state/")
+    assert response.status_code == 200
+    assert len(response.json()) > 0
+    assert any(player["username"] == "player5" and player["state"] == "active" for player in response.json())
+
+def test_change_player_state():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player6", 
+            "first_name": "Player", 
+            "last_name": "Six", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # change the state of the player
+    response = client.patch("/players/player6/state/", json={"state": "inactive"})
+    assert response.status_code == 200
+    assert response.json()["state"] == "inactive"
+
+def test_delete_player():
+    # create a player
+    response = client.post(
+        "/players/",
+        json={
+            "username": "player7", 
+            "first_name": "Player", 
+            "last_name": "Seven", 
+            "middle_name": "Test", 
+            "state": "active",
+            "birthday": "1990-01-01",
+            "gender": "male",
+        },
+    )
+    assert response.status_code == 200
+
+    # delete the player
+    response = client.delete("/players/player7")
+    assert response.status_code == 200
+
+    # check if the player was deleted
+    response = client.get("/players/player7")
+    assert response.status_code == 404

@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum, Date, DateTime, Float
 from sqlalchemy.orm import relationship 
-from database import Base ## Laptop
-#from app.database import Base ## docker
+from database import Base
 from enum import Enum as pyEnum
 import datetime
 
