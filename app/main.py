@@ -4,6 +4,9 @@ from typing import List
 import crud, models, schemas
 from database import SessionLocal, engine
 import time
+from starlette.responses import JSONResponse
+from pydantic import ValidationError
+from starlette.responses import JSONResponse
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -28,6 +31,16 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
     return response
+
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request, exc: ValidationError):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": "Data validation error",
+            "errors": exc.errors()
+        },
+    )
 
 @app.get('/')
 def root():
